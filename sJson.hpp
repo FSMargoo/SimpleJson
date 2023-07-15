@@ -812,7 +812,7 @@ public:
 					sJSON.push_back('\t');
 				}
 
-			sJSON.append(Node.first);
+			sJSON.append("\"" + Node.first + "\"");
 			sJSON.append(":");
 			sJSON.append(WriteValue(Node.second->Value, Format, Brackets, Level));
 
@@ -914,7 +914,7 @@ public:
 					sJSON.push_back('\t');
 				}
 
-			sJSON.append(Node.first);
+			sJSON.append("\"" + Node.first + "\"");
 			sJSON.append(":");
 			sJSON.append(WriteValue(Node.second->Value, Format, Brackets, Level + 1));
 

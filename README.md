@@ -47,25 +47,25 @@ int main()
 运行上面的代码，最终效果如下：
 ```
 JSON in format : {
-        sites:[
+        "sites":[
                 {
-                        name:"codeforce",
-                        rank:3,
-                        url:"www.codeforces.com"
+                        "name":"codeforce",
+                        "rank":3,
+                        "url":"www.codeforces.com"
                 },
                 {
-                        name:"google",
-                        rank:2,
-                        url:"www.google.com"
+                        "name":"google",
+                        "rank":2,
+                        "url":"www.google.com"
                 },
                 {
-                        name:"github",
-                        rank:1,
-                        url:"www.github.com"
+                        "name":"github",
+                        "rank":1,
+                        "url":"www.github.com"
                 }
         ]
 }
-JSON in not format : {sites:[{name:"codeforce",rank:3,url:"www.codeforces.com"},{name:"google",rank:2,url:"www.google.com"},{name:"github",rank:1,url:"www.github.com"}]}
+JSON in not format : {"sites":[{"name":"codeforce","rank":3,"url":"www.codeforces.com"},{"name":"google","rank":2,"url":"www.google.com"},{"name":"github","rank":1,"url":"www.github.com"}]}
 
 <name, codeforce> <rank, 3> <url, www.codeforces.com>
 <name, google> <rank, 2> <url, www.google.com>
