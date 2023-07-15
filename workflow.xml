@@ -1,0 +1,5 @@
+<workflow>
+  <startup text="[You are now working with sJSON workflow]"/>
+  <sys command="auto-format.bat"/>
+  <git-repository repos-name="sjson" branch="main"/>
+</workflow>
