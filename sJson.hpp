@@ -19,7 +19,7 @@ enum class sJSONTokenType {
     BigRight,
     MiddleLeft,
     MiddleRight,
-    wstring,
+    string,
     Number,
     Float,
     Boolean,
@@ -36,7 +36,7 @@ std::map<wchar_t, sJSONTokenType> sJSONTokenMap = {{'{', sJSONTokenType::BigLeft
                                                 {']', sJSONTokenType::MiddleRight},
                                                 {',', sJSONTokenType::Comma},
                                                 {':', sJSONTokenType::Colon}};
-std::map<sJSONTokenType, wchar_t> sJSONTokenwstringMap = {
+std::map<sJSONTokenType, wchar_t> sJSONTokenstringMap = {
         {sJSONTokenType::BigLeft,     '{'},
         {sJSONTokenType::BigRight,    '}'},
         {sJSONTokenType::MiddleLeft,  '['},
@@ -110,7 +110,7 @@ public:
     Type Value;
 };
 
-using sJSONwstring = sJSONRealValue<std::wstring>;
+using sJSONstring = sJSONRealValue<std::string>;
 using sJSONInt = sJSONRealValue<int>;
 using sJSONDouble = sJSONRealValue<double>;
 using sJSONBoolean = sJSONRealValue<bool>;
@@ -136,12 +136,12 @@ public:
         Value = nullptr;
     }
 
-    sJSONElementNode(const std::wstring &Tag, sJSONValue *Value) {
+    sJSONElementNode(const std::string &Tag, sJSONValue *Value) {
         this->Tag = Tag;
         this->Value = Value;
     }
 
-    sJSONElementNode(std::map<std::wstring, sJSONElementNode *> SetChildren) : Children(SetChildren), Value(nullptr) {
+    sJSONElementNode(std::map<std::string, sJSONElementNode *> SetChildren) : Children(SetChildren), Value(nullptr) {
     }
 
     ~sJSONElementNode() {}
@@ -161,7 +161,7 @@ public:
         return Value->GetType() == sJSONValueType::Null;
     }
 
-    const std::wstring GetTag() const {
+    const std::string GetTag() const {
         return Tag;
     }
 
@@ -178,14 +178,14 @@ public:
     }
 
 public:
-    sJSONElementNode *operator[](const std::wstring &ChildrenTag) {
+    sJSONElementNode *operator[](const std::string &ChildrenTag) {
         return Children[ChildrenTag];
     }
 
 public:
     sJSONValue *Value;
-    std::wstring Tag;
-    std::map<std::wstring, sJSONElementNode *> Children;
+    std::string Tag;
+    std::map<std::string, sJSONElementNode *> Children;
 } sJSONObject;
 
 class sJSONElementFinder {
@@ -193,7 +193,7 @@ public:
     sJSONElementFinder(sJSONElementNode *Ptr) : Value(Ptr) {
     }
 
-    sJSONElementFinder operator[](const std::wstring &Finder) {
+    sJSONElementFinder operator[](const std::string &Finder) {
         return sJSONElementFinder(Value->operator[](Finder));
     }
 
@@ -217,7 +217,7 @@ public:
         return Value->Value->GetType() == sJSONValueType::Value;
     }
 
-    bool Exsits(const std::wstring &Finder) {
+    bool Exsits(const std::string &Finder) {
         return Value->Children.find(Finder) != Value->Children.end();
     }
 
@@ -226,13 +226,13 @@ public:
         return Value->To<Type>();
     }
 
-    std::map<std::wstring, sJSONElementNode *>::iterator begin() {
+    std::map<std::string, sJSONElementNode *>::iterator begin() {
         Iterator = Value->Children.begin();
 
         return Iterator;
     }
 
-    std::map<std::wstring, sJSONElementNode *>::iterator end() {
+    std::map<std::string, sJSONElementNode *>::iterator end() {
         return Value->Children.end();
     }
 
@@ -266,7 +266,7 @@ public:
     }
 
 private:
-    std::map<std::wstring, sJSONElementNode *>::iterator Iterator;
+    std::map<std::string, sJSONElementNode *>::iterator Iterator;
     sJSONElementNode *Value;
 };
 
@@ -276,21 +276,21 @@ public:
     }
 
 public:
-    sJSONElementFinder operator[](const std::wstring &ChildrenTag) {
+    sJSONElementFinder operator[](const std::string &ChildrenTag) {
         return sJSONElementFinder(Object->operator[](ChildrenTag));
     }
 
-    bool Exsits(const std::wstring &Finder) {
+    bool Exsits(const std::string &Finder) {
         return Object->Children.find(Finder) != Object->Children.end();
     }
 
-    std::map<std::wstring, sJSONElementNode *>::iterator begin() {
+    std::map<std::string, sJSONElementNode *>::iterator begin() {
         Iterator = Object->Children.begin();
 
         return Iterator;
     }
 
-    std::map<std::wstring, sJSONElementNode *>::iterator end() {
+    std::map<std::string, sJSONElementNode *>::iterator end() {
         return Object->Children.end();
     }
 
@@ -308,14 +308,14 @@ public:
     }
 
 private:
-    std::map<std::wstring, sJSONElementNode *>::iterator Iterator;
+    std::map<std::string, sJSONElementNode *>::iterator Iterator;
     sJSONObject *Object;
 };
 
 class sJSONParserStatus {
 public:
-    using ErrorList = std::vector<std::wstring>;
-    using Iterator = std::vector<std::wstring>::iterator;
+    using ErrorList = std::vector<std::string>;
+    using Iterator = std::vector<std::string>::iterator;
 
 public:
     sJSONParserStatus() = default;
@@ -324,23 +324,23 @@ public:
         return !ErrorInfo.empty();
     }
 
-    std::vector<std::wstring>::iterator begin() {
+    std::vector<std::string>::iterator begin() {
         NativeIterator = ErrorInfo.begin();
         return NativeIterator;
     }
 
-    std::vector<std::wstring>::iterator end() {
+    std::vector<std::string>::iterator end() {
         return ErrorInfo.end();
     }
 
-    std::wstring &operator++() {
+    std::string &operator++() {
         ++NativeIterator;
 
         return *NativeIterator;
     }
 
-    std::wstring operator++(int) {
-        std::wstring Temp(*NativeIterator);
+    std::string operator++(int) {
+        std::string Temp(*NativeIterator);
         ++NativeIterator;
 
         return Temp;
@@ -353,18 +353,18 @@ public:
 
 class sJSONLexer {
 public:
-    sJSONLexer(const std::wstring &Code) : sJSON(Code) {
+    sJSONLexer(const std::string &Code) : sJSON(Code) {
         Line = 1;
         Iterator = sJSON.begin();
-        Rawwstring = true;
+        Rawstring = true;
     }
 
 public:
-    inline std::tuple<std::wstring, sJSONTokenType> operator()() {
+    inline std::tuple<std::string, sJSONTokenType> operator()() {
         if (Iterator == sJSON.end() || *Iterator == '\0') {
-            return {L"", sJSONTokenType::End};
+            return {"", sJSONTokenType::End};
         }
-        std::wstring Token;
+        std::string Token;
         bool ExsitsDot = false;
         bool Number = false;
         while (Iterator != sJSON.end()) {
@@ -381,18 +381,18 @@ public:
                         ExsitsDot = true;
                         Token.push_back(*Iterator);
                     } else {
-                        ParserStatus->ErrorInfo.push_back(L"<Bad number>");
-                        return {L"", sJSONTokenType::Unknown};
+                        ParserStatus->ErrorInfo.push_back("<Bad number>");
+                        return {"", sJSONTokenType::Unknown};
                     }
                 } else {
                     Token.push_back(*Iterator);
                 }
             } else if (!Token.empty()) {
                 if (!Number) {
-                    if (Token == L"true" || Token == L"false") {
+                    if (Token == "true" || Token == "false") {
                         return {Token, sJSONTokenType::Boolean};
                     }
-                    if (Token == L"null") {
+                    if (Token == "nul") {
                         return {Token, sJSONTokenType::Null};
                     } else {
                         return {Token, sJSONTokenType::Unknown};
@@ -405,20 +405,20 @@ public:
                     }
                 }
             } else if (*Iterator == '\"') {
-                if (!Rawwstring) {
+                if (!Rawstring) {
                     Token.push_back(*Iterator);
                 }
                 ++Iterator;
                 while (Iterator != sJSON.end()) {
                     if (*Iterator == '\"') {
-                        if (!Rawwstring) {
+                        if (!Rawstring) {
                             Token.push_back(*Iterator);
                         }
                         ++Iterator;
-                        return {Token, sJSONTokenType::wstring};
+                        return {Token, sJSONTokenType::string};
                     }
                     if (*Iterator == '\\') {
-                        if (Iterator + 1 != sJSON.end() && Rawwstring) {
+                        if (Iterator + 1 != sJSON.end() && Rawstring) {
                             ++Iterator;
                             if (*Iterator == '\"') {
                                 Token.push_back('\"');
@@ -433,8 +433,8 @@ public:
                                 Token.push_back('\r');
                             }
                         } else {
-                            ParserStatus->ErrorInfo.push_back(L"Not match \" of the begin of \"");
-                            return {L"", sJSONTokenType::Unknown};
+                            ParserStatus->ErrorInfo.push_back("Not match \" of the begin of \"");
+                            return {"", sJSONTokenType::Unknown};
                         }
                     } else {
                         Token.push_back(*Iterator);
@@ -457,7 +457,7 @@ public:
             ++Iterator;
         }
 
-        return {L"", sJSONTokenType::End};
+        return {"", sJSONTokenType::End};
     }
 
     bool operator*() {
@@ -469,18 +469,18 @@ public:
     }
 
 public:
-    bool Rawwstring;
+    bool Rawstring;
 
 private:
     sJSONParserStatus *ParserStatus;
-    std::wstring::iterator Iterator;
-    std::wstring sJSON;
+    std::string::iterator Iterator;
+    std::string sJSON;
     size_t Line;
 };
 
 class sJSONParser {
 public:
-    sJSONParser(std::wstring Code) : RootObject(new sJSONObject()), Lexer(Code) {
+    sJSONParser(std::string Code) : RootObject(new sJSONObject()), Lexer(Code) {
     }
 
 public:
@@ -499,7 +499,7 @@ public:
                 break;
             }
             default: {
-                Status.ErrorInfo.push_back(L"Unknown token at line " + std::to_wstring(Lexer.GetLine()) + L".");
+                Status.ErrorInfo.push_back("Unknown token at line " + std::to_string(Lexer.GetLine()) + ".");
                 return sJSONRootNode(RootObject);
             }
         }
@@ -508,23 +508,23 @@ public:
     }
 
 private:
-    std::map<std::wstring, sJSONElementNode *> ParseSet() {
-        std::map<std::wstring, sJSONElementNode *> Set;
+    std::map<std::string, sJSONElementNode *> ParseSet() {
+        std::map<std::string, sJSONElementNode *> Set;
         while (*Lexer) {
             auto Token = Lexer();
             switch (std::get<1>(Token)) {
-                case sJSONTokenType::wstring: {
-                    std::wstring Tag = std::get<0>(Token);
+                case sJSONTokenType::string: {
+                    std::string Tag = std::get<0>(Token);
                     Token = Lexer();
 
                     if (std::get<1>(Token) != sJSONTokenType::Colon) {
-                        Status.ErrorInfo.push_back(L"Unknown token at line " + std::to_wstring(Lexer.GetLine()) + L".");
-                        return std::map<std::wstring, sJSONElementNode *>();
+                        Status.ErrorInfo.push_back("Unknown token at line " + std::to_string(Lexer.GetLine()) + ".");
+                        return std::map<std::string, sJSONElementNode *>();
                     }
 
                     auto Value = ParseValue();
                     if (Status.ExsitsError()) {
-                        return std::map<std::wstring, sJSONElementNode *>();
+                        return std::map<std::string, sJSONElementNode *>();
                     }
 
                     Set.emplace(Tag, new sJSONElementNode(Tag, Value));
@@ -534,15 +534,15 @@ private:
 
                     Token = Lexer();
                     if (std::get<1>(Token) != sJSONTokenType::Comma && std::get<1>(Token) != sJSONTokenType::End) {
-                        Status.ErrorInfo.push_back(L"Unknown token at line " + std::to_wstring(Lexer.GetLine()) + L".");
-                        return std::map<std::wstring, sJSONElementNode *>();
+                        Status.ErrorInfo.push_back("Unknown token at line " + std::to_string(Lexer.GetLine()) + ".");
+                        return std::map<std::string, sJSONElementNode *>();
                     }
 
                     break;
                 }
                 default: {
-                    Status.ErrorInfo.push_back(L"Unknown token at line " + std::to_wstring(Lexer.GetLine()) + L".");
-                    return std::map<std::wstring, sJSONElementNode *>();
+                    Status.ErrorInfo.push_back("Unknown token at line " + std::to_string(Lexer.GetLine()) + ".");
+                    return std::map<std::string, sJSONElementNode *>();
                 }
             }
         }
@@ -560,7 +560,7 @@ private:
             auto Token = Lexer();
 
             if (std::get<1>(Token) != sJSONTokenType::End && std::get<1>(Token) != sJSONTokenType::Comma) {
-                Status.ErrorInfo.push_back(L"Unknown token at line " + std::to_wstring(Lexer.GetLine()) + L".");
+                Status.ErrorInfo.push_back("Unknown token at line " + std::to_string(Lexer.GetLine()) + ".");
                 return nullptr;
             }
         }
@@ -572,20 +572,20 @@ private:
         while (*Lexer) {
             auto Token = Lexer();
             switch (std::get<1>(Token)) {
-                case sJSONTokenType::wstring: {
-                    return new sJSONRealValue<std::wstring>(std::get<0>(Token));
+                case sJSONTokenType::string: {
+                    return new sJSONRealValue<std::string>(std::get<0>(Token));
                 }
                 case sJSONTokenType::Number: {
-                    return new sJSONRealValue<int>(_wtoi(std::get<0>(Token).c_str()));
+                    return new sJSONRealValue<int>(atoi(std::get<0>(Token).c_str()));
                 }
                 case sJSONTokenType::Float: {
-                    return new sJSONRealValue<double>(_wtoi(std::get<0>(Token).c_str()));
+                    return new sJSONRealValue<double>(atoi(std::get<0>(Token).c_str()));
                 }
                 case sJSONTokenType::Null: {
                     return new sJSONNull();
                 }
                 case sJSONTokenType::Boolean: {
-                    if (std::get<0>(Token) == L"true") {
+                    if (std::get<0>(Token) == "true") {
                         return new sJSONRealValue<bool>(true);
                     } else {
                         return new sJSONRealValue<bool>(false);
@@ -610,20 +610,20 @@ private:
                     return Array;
                 }
                 default: {
-                    Status.ErrorInfo.push_back(L"Unknown token at line " + std::to_wstring(Lexer.GetLine()) + L".");
+                    Status.ErrorInfo.push_back("Unknown token at line " + std::to_string(Lexer.GetLine()) + ".");
                     return nullptr;
                 }
             }
         }
 
-        Status.ErrorInfo.push_back(L"<Bad sJSON>");
+        Status.ErrorInfo.push_back("<Bad sJSON>");
         return nullptr;
     }
 
 private:
-    inline std::wstring FetchContext(const sJSONTokenType &Left, const sJSONTokenType &Right) {
-        Lexer.Rawwstring = false;
-        std::wstring Context;
+    inline std::string FetchContext(const sJSONTokenType &Left, const sJSONTokenType &Right) {
+        Lexer.Rawstring = false;
+        std::string Context;
         int DeepthLevel = 0;
         while (*Lexer) {
             auto Tuple = Lexer();
@@ -633,15 +633,15 @@ private:
             if (std::get<1>(Tuple) == Right) {
                 --DeepthLevel;
                 if (DeepthLevel == -1) {
-                    Lexer.Rawwstring = true;
+                    Lexer.Rawstring = true;
                     return Context;
                 }
             }
 
-            Context.append(std::get<0>(Tuple) + L" ");
+            Context.append(std::get<0>(Tuple) + " ");
         }
 
-        Status.ErrorInfo.push_back(L"<Bad sJSON tree>");
+        Status.ErrorInfo.push_back("<Bad sJSON tree>");
 
         return Context;
     }
@@ -656,14 +656,14 @@ private:
 
 class sJSONWriter {
 public:
-    static std::wstring WriteJSON(sJSONRootNode &Root, bool Format = true, bool Brackets = true, size_t Level = 1) {
-        std::wstring sJSON;
+    static std::string WriteJSON(sJSONRootNode &Root, bool Format = true, bool Brackets = true, size_t Level = 1) {
+        std::string sJSON;
         if (Brackets) {
             if (Format)
                 sJSONHelperCountDown(Level) {
                     sJSON.push_back('\t');
                 }
-            sJSON = L"{";
+            sJSON = "{";
             if (Format) {
                 sJSON.push_back('\n');
             }
@@ -674,8 +674,8 @@ public:
                     sJSON.push_back('\t');
                 }
 
-            sJSON.append(L"\"" + Node.first + L"\"");
-            sJSON.append(L":");
+            sJSON.append("\"" + Node.first + "\"");
+            sJSON.append(":");
             sJSON.append(WriteValue(Node.second->Value, Format, Brackets, Level));
 
             sJSON.push_back(',');
@@ -700,15 +700,15 @@ public:
         return sJSON;
     }
 
-    static std::wstring
+    static std::string
     WriteJSON(sJSONElementFinder &Finder, bool Format = true, bool Brackets = true, size_t Level = 1) {
-        std::wstring sJSON;
+        std::string sJSON;
         if (Brackets) {
             if (Format)
                 sJSONHelperCountDown(Level) {
                     sJSON.push_back('\t');
                 }
-            sJSON = L"{";
+            sJSON = "{";
             if (Format) {
                 sJSON.push_back('\n');
             }
@@ -720,7 +720,7 @@ public:
                 }
 
             sJSON.append(Node.first);
-            sJSON.append(L":");
+            sJSON.append(":");
             sJSON.append(WriteValue(Node.second->Value, Format, Brackets, Level));
 
             sJSON.push_back(',');
@@ -745,11 +745,11 @@ public:
         return sJSON;
     }
 
-    static std::wstring WriteJSONByObject(sJSONObject *Object, bool Format = true, bool Brackets = true,
+    static std::string WriteJSONByObject(sJSONObject *Object, bool Format = true, bool Brackets = true,
                                           size_t Level = 1) {
-        std::wstring sJSON;
+        std::string sJSON;
         if (Brackets) {
-            sJSON = L"{";
+            sJSON = "{";
             if (Format) {
                 sJSON.push_back('\n');
             }
@@ -760,8 +760,8 @@ public:
                     sJSON.push_back('\t');
                 }
 
-            sJSON.append(L"\"" + Node.first + L"\"");
-            sJSON.append(L":");
+            sJSON.append("\"" + Node.first + "\"");
+            sJSON.append(":");
             sJSON.append(WriteValue(Node.second->Value, Format, Brackets, Level + 1));
 
             sJSON.push_back(',');
@@ -786,11 +786,11 @@ public:
         return sJSON;
     }
 
-    static std::wstring
+    static std::string
     WriteJSONByArray(sJSONArray *Object, bool Format = true, bool Brackets = true, size_t Level = 1) {
-        std::wstring sJSON;
+        std::string sJSON;
         if (Brackets) {
-            sJSON = L"[";
+            sJSON = "[";
             if (Format) {
                 sJSON.push_back('\n');
             }
@@ -825,7 +825,7 @@ public:
         return sJSON;
     }
 
-    static std::wstring WriteValue(sJSONValue *Node, bool Format = true, bool Brackets = true, size_t Level = 1) {
+    static std::string WriteValue(sJSONValue *Node, bool Format = true, bool Brackets = true, size_t Level = 1) {
         if (Node->GetType() == sJSONValueType::Object) {
             return WriteJSONByObject(Node->To<sJSONObject *>(), Format, Brackets, Level + 1);
         }
@@ -833,26 +833,26 @@ public:
             return WriteJSONByArray(Node->To<sJSONArray *>(), Format, Brackets, Level + 1);
         }
         if (Node->GetType() == sJSONValueType::Null) {
-            return L"null";
+            return "nul";
         } else {
-            if (sJSONRealValue<std::wstring>::Equal(Node)) {
-                return L"\"" + ((sJSONRealValue<std::wstring> *) Node)->Value + L"\"";
+            if (sJSONRealValue<std::string>::Equal(Node)) {
+                return "\"" + ((sJSONRealValue<std::string> *) Node)->Value + "\"";
             }
             if (sJSONRealValue<int>::Equal(Node)) {
-                return std::to_wstring(((sJSONRealValue<int> *) Node)->Value);
+                return std::to_string(((sJSONRealValue<int> *) Node)->Value);
             }
             if (sJSONRealValue<double>::Equal(Node)) {
-                return std::to_wstring(((sJSONRealValue<double> *) Node)->Value);
+                return std::to_string(((sJSONRealValue<double> *) Node)->Value);
             }
             if (sJSONRealValue<bool>::Equal(Node)) {
                 if (((sJSONRealValue<bool> *) Node)->Value) {
-                    return L"true";
+                    return "true";
                 } else {
-                    return L"false";
+                    return "false";
                 }
             }
         }
 
-        return L"?";
+        return "?";
     }
 };
